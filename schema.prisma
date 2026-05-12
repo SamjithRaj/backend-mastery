@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  progress     Progress[]
+  tasks        Task[]
+  problems     Problem[]
+  projects     Project[]
+  applications JobApplication[]
+  notes        Note[]
+  studySessions StudySession[]
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  category  String   // DSA, CPP, Backend, Projects, etc.
+  percentage Float   @default(0)
+  streak    Int      @default(0)
+  lastStudied DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, category])
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  description String?
+  category    String
+  priority    String   // high, medium, low
+  status      String   @default("pending") // pending, completed
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Problem {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  difficulty  String   // easy, medium, hard
+  category    String   // arrays, strings, trees, etc.
+  status      String   @default("unsolved") // unsolved, solved, reviewed
+  notes       String?
+  solution    String?
+  timeSpent   Int      @default(0) // in minutes
+  attempts    Int      @default(0)
+  lastAttempt DateTime?
+  solvedAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  name        String
+  description String?
+  status      String   @default("not-started") // not-started, in-progress, completed
+  githubUrl   String?
+  progress    Float    @default(0)
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model JobApplication {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  company      String
+  role         String
+  status       String   @default("applied") // applied, oa, interview, rejected, accepted
+  appliedDate  DateTime @default(now())
+  oaDate       DateTime?
+  interviewDate DateTime?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  content   String
+  category  String
+  tags      String?  // JSON array
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudySession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  category  String
+  duration  Int      // in minutes
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+}
